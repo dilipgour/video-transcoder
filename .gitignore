@@ -1,0 +1,4 @@
+frontend/node_modules/
+backend/node_modules/
+transcoder/node_modules/
+node_modules/
