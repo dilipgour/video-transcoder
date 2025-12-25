@@ -5,7 +5,7 @@ import path from "path";
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     console.log(path.resolve())
-    cb(null,  "C:/transcoder/storage/raw");
+    cb(null,  "C:/js/video-transcoder/transcoder/storage/raw");
   },
    filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)

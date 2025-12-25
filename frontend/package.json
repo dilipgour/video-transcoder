@@ -11,19 +11,20 @@
   },
   "dependencies": {
     "@types/axios": "^0.14.4",
+    "@types/video.js": "^7.3.58",
     "axios": "^1.9.0",
     "hls.js": "^1.0.3-0.canary.7275",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "video.js": "^8.23.4",
     "videojs-contrib-quality-levels": "^4.1.0",
-    "videojs-hls-quality-selector": "^2.0.0"
+    "videojs-contrib-quality-menu": "^1.0.4",
+    "videojs-http-source-selector": "^1.1.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "@types/video.js": "^7.3.58",
     "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",

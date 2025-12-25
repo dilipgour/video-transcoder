@@ -1,8 +1,11 @@
 import Queue from "bull"
 import {prisma} from "./lib/db"
 import { runFFmpeg } from "./lib/ffmpeg";
+import dotenv from "dotenv"
 
-const videoQueue = new Queue('video transcoding', 'redis://127.0.0.1:6379');
+dotenv.config()
+
+const videoQueue = new Queue('video transcoding', process.env.REDIS_URL!);
 const fn  = async()=>{
     console.log("worker...................")
     videoQueue.process( async (job,done)=>{
@@ -12,6 +15,7 @@ await prisma.video.update({
     where:{id:job.data.id},
     data:{status:"PROCESSING"}
 })
+
 
 
 try {

@@ -15,8 +15,8 @@ import Queue from 'bull';
 import { Status } from "./generated/prisma/index";
 
 const exec = promisify(child_process.exec);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = dirname(__filename);
 const port = process.env.PORT || 3000;
 const app = express();
 
@@ -42,9 +42,9 @@ app.use(
 //   next()
 // })
   
-app.use(express.static("C:/transcoder/storage"));
+app.use(express.static("C:/js/video-transcoder/transcoder/storage"));
 
-const videoQueue = new Queue('video transcoding', 'redis://127.0.0.1:6379');
+const videoQueue = new Queue('video transcoding', process.env.REDIS_URL!);
 
 
 

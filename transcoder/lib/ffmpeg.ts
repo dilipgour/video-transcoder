@@ -1,16 +1,16 @@
-import { spawn } from "child_process";
-import fs from "fs/promises";
-import path from "path";
+import { spawn } from "node:child_process";
+import  fs  from "node:fs/promises";
+import path from "node:path"
 
 export async function runFFmpeg(inputFile: string,oupFile:string): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const dirName = inputFile.split(".")[0];
-    const outputDir = path.resolve("C:/transcoder/storage/transcoded", dirName);
+    const outputDir = path.resolve("C:/js/video-transcoder/transcoder/storage/transcoded", dirName);
 
-    // Ensure output directory exists
+    
     await fs.mkdir(outputDir, { recursive: true });
 
-    const inputPath = path.resolve("C:/transcoder/storage/raw", inputFile);
+    const inputPath = path.resolve("C:/js/video-transcoder/transcoder/storage/raw", inputFile);
 
     // FFmpeg arguments for adaptive LS (3 variants)
     const args = [
@@ -45,6 +45,7 @@ export async function runFFmpeg(inputFile: string,oupFile:string): Promise<void>
     ];
 
     const ffmpeg = spawn("ffmpeg", args);
+    console.log(ffmpeg)
 
     ffmpeg.stderr.on("data", (data) => {
       console.log("FFmpeg:", data.toString());

@@ -1,60 +1,59 @@
-import React, { useEffect, useRef } from "react";
-import videojs from "video.js";
-import type Player from "video.js/dist/types/player";
-import "video.js/dist/video-js.css";
+import React, { useEffect, useRef } from 'react';
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
+import "videojs-contrib-quality-menu"
 
-interface VideoPlayerProps {
-  src: string;
+type VideoJsPlayer = ReturnType<typeof videojs>;
+type VideoJsPlayerOptions = Parameters<typeof videojs>[1];
+
+interface Props {
+  options: VideoJsPlayerOptions;
+  onReady?: (player: VideoJsPlayer) => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const playerRef = useRef<Player | null>(null);
+const VideoJS: React.FC<Props> = ({ options, onReady }) => {
+  const videoRef = useRef<HTMLDivElement | null>(null);
+  const playerRef = useRef<VideoJsPlayer | null>(null);
 
   useEffect(() => {
-    let player: Player | null = null;
+    if (!videoRef.current) return;
 
-    if (videoRef.current) {
-      // Delay init to let React commit DOM
-      setTimeout(() => {
-        if (videoRef.current && !playerRef.current) {
-          player = videojs(videoRef.current, {
-            autoplay: false,
-            controls: true,
-            responsive: true,
-            fluid: true,
-            sources: [
-              {
-                src,
-                type: "application/x-mpegURL", // HLS
-              },
-            ],
-          });
+    if (!playerRef.current) {
+      const videoElement = document.createElement('video-js');
+      videoElement.classList.add('vjs-big-play-centered');
+      videoRef.current.appendChild(videoElement);
 
-          
-let qualityLevels = player.qualityLevels();
-          playerRef.current = player;
-        }
-      }, 0);
+      const player = videojs(videoElement, options, () => {
+        console.log("pligins..........", videojs.getPlugins())
+        player.qualityMenu();
+        videojs.log('player is ready');
+        onReady?.(player);
+      });
+
+      playerRef.current = player;
+    } else {
+      const player = playerRef.current;
+      player.autoplay(options.autoplay);
+      if (options.sources) {
+        player.src(options.sources);
+      }
     }
+  }, [options, onReady]);
 
+  useEffect(() => {
     return () => {
-      if (playerRef.current) {
+      if (playerRef.current && !playerRef.current.isDisposed()) {
         playerRef.current.dispose();
         playerRef.current = null;
       }
     };
-  }, [src]);
+  }, []);
 
   return (
     <div data-vjs-player>
-      <video
-        ref={videoRef}
-        className="video-js vjs-big-play-centered"
-        playsInline
-      />
+      <div ref={videoRef} />
     </div>
   );
 };
 
-export default VideoPlayer;
+export default VideoJS;
