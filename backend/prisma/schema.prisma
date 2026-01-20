@@ -23,7 +23,7 @@ enum Status {
 
 model Video {
   id        String   @id @default(uuid())
-  rawUrl    String
+  key       String
   status    Status
   url       String?
   createdAt DateTime @default(now())

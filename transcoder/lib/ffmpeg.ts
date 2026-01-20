@@ -2,19 +2,25 @@ import { spawn } from "node:child_process";
 import  fs  from "node:fs/promises";
 import path from "node:path"
 
-export async function runFFmpeg(inputFile: string,oupFile:string): Promise<void> {
+
+
+
+
+
+export async function runFFmpeg(inputFile: string,outputFile:string): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const dirName = inputFile.split(".")[0];
-    const outputDir = path.resolve("C:/js/video-transcoder/transcoder/storage/transcoded", dirName);
+    const outputDir = path.resolve("C:/js/video-transcoder/transcoder/storage/transcoded", outputFile.split("/")[1]);
 
     
     await fs.mkdir(outputDir, { recursive: true });
 
-    const inputPath = path.resolve("C:/js/video-transcoder/transcoder/storage/raw", inputFile);
 
-    // FFmpeg arguments for adaptive LS (3 variants)
+  
+ 
+
     const args = [
-      "-i", inputPath,
+      "-i", inputFile,
       "-filter_complex",
       "[0:v]split=3[v1][v2][v3]; \
        [v1]scale=w=1920:h=1080[v1out]; \
@@ -45,7 +51,7 @@ export async function runFFmpeg(inputFile: string,oupFile:string): Promise<void>
     ];
 
     const ffmpeg = spawn("ffmpeg", args);
-    console.log(ffmpeg)
+    // console.log(ffmpeg)
 
     ffmpeg.stderr.on("data", (data) => {
       console.log("FFmpeg:", data.toString());
@@ -62,3 +68,9 @@ export async function runFFmpeg(inputFile: string,oupFile:string): Promise<void>
   });
 }
 
+
+
+
+
+
+runFFmpeg("C:/js/video-transcoder/transcoder/storage/raw/OOP 7  Collections Framework Vector Class Enums in Java_1080p.mp4","videos/test" )

@@ -1,20 +1,19 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useRef } from "react";
 import "./App.css";
-import axios from "axios";
 import VideoJS from "./components/video-player";
 import videojs from "video.js";
+import UploadPage from "./pages/upload-page";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 type VideoJsPlayerOptions = Parameters<typeof videojs>[1];
 
 function App() {
-  const [file, setFile] = useState<File | null>(null);
   const playerRef = useRef<VideoJsPlayer | null>(null);
 
   const videoJsOptions: VideoJsPlayerOptions = {
     autoplay: true,
     controls: true,
-   // responsive: true,
+    // responsive: true,
     fluid: true,
     sources: [
       {
@@ -26,7 +25,7 @@ function App() {
 
   const handlePlayerReady = (player: VideoJsPlayer) => {
     playerRef.current = player;
-   
+
     player.on("waiting", () => {
       videojs.log("player is waiting");
     });
@@ -35,37 +34,20 @@ function App() {
       videojs.log("player will dispose");
     });
 
-    player.on("ready",()=>{
-        const ql = player.qualityLevels();
-      
-      console.log(ql.length); 
-      console.log(ql.levels_); 
-      console.log(player.getVideoPlaybackQuality())
+    player.on("ready", () => {
+      //@ts-ignore
+      const ql = player.qualityLevels();
 
-    })
-    
-  };
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const handleClick = async () => {
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("uploaded_file", file);
-
-    await axios.post("http://localhost:3000/upload", formData);
+      console.log(ql.length);
+      console.log(ql.levels_);
+      console.log(player.getVideoPlaybackQuality());
+    });
   };
 
   return (
     <>
-      <input type="file" onChange={handleChange} />
+      <UploadPage />
       <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
-      <button onClick={handleClick}>upload</button>
     </>
   );
 }

@@ -1,18 +1,15 @@
 import express from "express";
 import cors from "cors"
-import path from "path";
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import { promisify } from 'node:util';
 import child_process from 'node:child_process';
-import { upload } from "./lib/uploader";
 import dotenv from "dotenv"
-import {prisma} from "./lib/db"
+import { prisma } from "./lib/db.js"
 
 dotenv.config()
 //@ts-ignore
 import Queue from 'bull';
-import { Status } from "./generated/prisma/index";
+import { Status } from "./generated/prisma/index.js";
+import { getPreSignedUrl } from "./lib/s3/index.js";
 
 const exec = promisify(child_process.exec);
 // const __filename = fileURLToPath(import.meta.url);
@@ -35,65 +32,80 @@ app.use(
 //   res.header(
 //     "Access-Control-Allow-Headers",
 //     "Origin, X-Requested-With, Content-Type, Accept",
-    
+
 //   );
 //   res.setHeader('Content-Type', 'video/mp4');
 //   res.setHeader('Content-Disposition', 'inline');
 //   next()
 // })
-  
+
 app.use(express.static("C:/js/video-transcoder/transcoder/storage"));
 
 const videoQueue = new Queue('video transcoding', process.env.REDIS_URL!);
 
 
 
-app.get("/", async(req, res) => {
-  
-    res.json({ message: "Welcome to the Express + TypeScript Server!" });
+app.get("/", async (req, res) => {
+
+  res.json({ message: "Welcome to the Express + TypeScript Server!" });
 });
 
 
 
-app.post("/upload",upload.single('uploaded_file'),async (req,res)=>{
+app.post("/getpresignedUrl", async (req, res) => {
 
-    if(!req.file){
-         res.status(400).json({ error:"file not found" });
-         return
+  try {
+
+    const { key } = req.body
+
+    if (key.length < 3) {
+      return
     }
 
-      
-    try {
-      
-   const video=  await prisma.video.create({
-    data:{
-      rawUrl: req.file.destination + "/" + req.file.filename,
-      status:Status.UPLOADED
+    const { error, url } = await getPreSignedUrl(key)
+
+    if (error) {
+      res.status(500).json({ err: "Internal server error" })
+      return
     }
-   })
 
 
-    // console.log(req.file)
-    // console.log(video)
-const data = await videoQueue.add({fileName:req.file.filename,id:video.id})
-
-console.log(data)
- 
-const url = `${req.host}/uploads/${req.file.filename}`
-
-res.json({ url });
-} catch (error) {
-      console.log(error)
-      res.status(400).json({err:"Internal server error"})
-    }
+    res.json({ url });
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ err: "Internal server error" })
+  }
 
 })
 
+app.post("/upload-compelete", async (req, res) => {
+  try {
+    const { key } = req.body
+
+
+
+    const video = await prisma.video.create({
+      data: {
+        key,
+        status: Status.UPLOADED
+      }
+    })
+
+    const data = await videoQueue.add({ key, id: video.id })
+
+    console.log(video)
+
+    res.status(200).json({ message: "video uploaded" })
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ err: "Internal server error" })
+  }
+})
+
 app.listen(port, () => {
-    console.log(`The server is running at http://localhost:${port}`);
+  console.log(`The server is running at http://localhost:${port}`);
 });
-
-
 
 
 

@@ -4,3 +4,4 @@ transcoder/node_modules/
 node_modules/
 transcoder/storage
 transcoder/.env
+transcoder/dist
